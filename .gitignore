@@ -1,3 +1,6 @@
+#Gogland
+.idea/
+
 # Compiled files
 *.tfstate
 *.tfstate.backup
