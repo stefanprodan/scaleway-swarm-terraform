@@ -6,3 +6,4 @@ init:
 	@terraform -v
 	@brew install jq
 	@jq --version
+	@terraform init
