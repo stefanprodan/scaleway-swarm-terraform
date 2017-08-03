@@ -7,3 +7,7 @@ init:
 	@brew install jq
 	@jq --version
 	@terraform init
+
+reset:
+	@terraform destroy -force
+	@terraform apply

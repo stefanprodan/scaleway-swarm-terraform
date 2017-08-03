@@ -22,7 +22,7 @@ resource "scaleway_server" "swarm_manager" {
   image          = "${data.scaleway_image.xenial.id}"
   type           = "VC1S"
   bootscript     = "${data.scaleway_bootscript.rancher.id}"
-  security_group = "${scaleway_security_group.swarm_default.id}"
+  security_group = "${scaleway_security_group.swarm_managers.id}"
   public_ip      = "${scaleway_ip.swarm_manager_ip.ip}"
 
   connection {
@@ -41,37 +41,3 @@ resource "scaleway_server" "swarm_manager" {
   }
 }
 
-resource "scaleway_security_group" "swarm_default" {
-  name        = "swarm_default"
-  description = "Allow SSH traffic"
-}
-
-resource "scaleway_security_group_rule" "ssh_accept" {
-  security_group = "${scaleway_security_group.swarm_default.id}"
-
-  action    = "accept"
-  direction = "inbound"
-  ip_range  = "0.0.0.0/0"
-  protocol  = "TCP"
-  port      = 22
-}
-
-resource "scaleway_security_group_rule" "http_accept" {
-  security_group = "${scaleway_security_group.swarm_default.id}"
-
-  action    = "accept"
-  direction = "inbound"
-  ip_range  = "0.0.0.0/0"
-  protocol  = "TCP"
-  port      = 80
-}
-
-resource "scaleway_security_group_rule" "https_accept" {
-  security_group = "${scaleway_security_group.swarm_default.id}"
-
-  action    = "accept"
-  direction = "inbound"
-  ip_range  = "0.0.0.0/0"
-  protocol  = "TCP"
-  port      = 443
-}
