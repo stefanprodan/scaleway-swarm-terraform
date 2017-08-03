@@ -14,16 +14,18 @@ data "scaleway_image" "xenial" {
   name         = "Ubuntu Xenial"
 }
 
-resource "scaleway_ip" "swarm_manager_ip" {}
+resource "scaleway_ip" "swarm_manager_ip" {
+  count = "${var.manager_instance_count}"
+}
 
 resource "scaleway_server" "swarm_manager" {
-  count          = 1
+  count          = "${var.manager_instance_count}"
   name           = "swarm_manager-${count.index + 1}"
   image          = "${data.scaleway_image.xenial.id}"
-  type           = "VC1S"
+  type           = "${var.manager_instance_type}"
   bootscript     = "${data.scaleway_bootscript.rancher.id}"
   security_group = "${scaleway_security_group.swarm_managers.id}"
-  public_ip      = "${scaleway_ip.swarm_manager_ip.ip}"
+  public_ip      = "${element(scaleway_ip.swarm_manager_ip.*.ip, count.index)}"
 
   connection {
     type = "ssh"
@@ -43,21 +45,23 @@ resource "scaleway_server" "swarm_manager" {
 
 data "external" "swarm_tokens" {
   program = ["./fetch-tokens.sh"]
+
   query = {
     host = "${scaleway_ip.swarm_manager_ip.0.ip}"
   }
+
   depends_on = ["scaleway_server.swarm_manager"]
 }
 
 resource "scaleway_ip" "swarm_worker_ip" {
-  count = 2
+  count = "${var.worker_instance_count}"
 }
 
 resource "scaleway_server" "swarm_worker" {
-  count          = 2
+  count          = "${var.worker_instance_count}"
   name           = "swarm_worker-${count.index + 1}"
   image          = "${data.scaleway_image.xenial.id}"
-  type           = "VC1S"
+  type           = "${var.worker_instance_type}"
   bootscript     = "${data.scaleway_bootscript.rancher.id}"
   security_group = "${scaleway_security_group.swarm_workers.id}"
   public_ip      = "${element(scaleway_ip.swarm_worker_ip.*.ip, count.index)}"

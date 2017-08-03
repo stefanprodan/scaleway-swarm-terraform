@@ -1,4 +1,3 @@
-
 resource "scaleway_security_group" "swarm_managers" {
   name        = "swarm_managers"
   description = "Allow HTTP/S and SSH traffic"
