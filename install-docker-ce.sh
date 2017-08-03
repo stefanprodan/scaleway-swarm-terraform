@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+DOCKER_VERSION=$1
+
 # setup Docker repository
 apt-get update -y
 apt-get install -y \
@@ -15,5 +17,5 @@ add-apt-repository \
 
 # install Docker CE
 apt-get update -y
-apt-get install -y docker-ce
+apt-get install -y docker-ce=$DOCKER_VERSION
 

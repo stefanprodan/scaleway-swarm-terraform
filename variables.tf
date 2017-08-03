@@ -1,3 +1,7 @@
+variable "docker_version" {
+  default = "17.06.0~ce-0~ubuntu"
+}
+
 variable "manager_instance_count" {
   default = 1
 }

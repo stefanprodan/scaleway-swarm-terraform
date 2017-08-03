@@ -20,7 +20,7 @@ resource "scaleway_ip" "swarm_manager_ip" {
 
 resource "scaleway_server" "swarm_manager" {
   count          = "${var.manager_instance_count}"
-  name           = "swarm_manager-${count.index + 1}"
+  name           = "swarm-manager-${count.index + 1}"
   image          = "${data.scaleway_image.xenial.id}"
   type           = "${var.manager_instance_type}"
   bootscript     = "${data.scaleway_bootscript.rancher.id}"
@@ -32,12 +32,15 @@ resource "scaleway_server" "swarm_manager" {
     user = "root"
   }
 
-  provisioner "remote-exec" {
-    script = "install-docker-ce.sh"
+  provisioner "file" {
+    source      = "install-docker-ce.sh"
+    destination = "/tmp/install-docker-ce.sh"
   }
 
   provisioner "remote-exec" {
     inline = [
+      "chmod +x /tmp/install-docker-ce.sh",
+      "/tmp/install-docker-ce.sh ${var.docker_version}",
       "docker swarm init --advertise-addr ${self.private_ip}",
     ]
   }
@@ -59,7 +62,7 @@ resource "scaleway_ip" "swarm_worker_ip" {
 
 resource "scaleway_server" "swarm_worker" {
   count          = "${var.worker_instance_count}"
-  name           = "swarm_worker-${count.index + 1}"
+  name           = "swarm-worker-${count.index + 1}"
   image          = "${data.scaleway_image.xenial.id}"
   type           = "${var.worker_instance_type}"
   bootscript     = "${data.scaleway_bootscript.rancher.id}"
@@ -71,12 +74,15 @@ resource "scaleway_server" "swarm_worker" {
     user = "root"
   }
 
-  provisioner "remote-exec" {
-    script = "install-docker-ce.sh"
+  provisioner "file" {
+    source      = "install-docker-ce.sh"
+    destination = "/tmp/install-docker-ce.sh"
   }
 
   provisioner "remote-exec" {
     inline = [
+      "chmod +x /tmp/install-docker-ce.sh",
+      "/tmp/install-docker-ce.sh ${var.docker_version}",
       "docker swarm join --token ${data.external.swarm_tokens.result.worker} ${scaleway_server.swarm_manager.0.private_ip}:2377",
     ]
   }
