@@ -2,7 +2,7 @@ provider "scaleway" {
   region = "ams1"
 }
 
-// Racher is required since Scaleway Docker bootstrap is missing IPVS_NFCT and IPVS_RR
+// Using Racher since Scaleway Docker bootstrap is missing IPVS_NFCT and IPVS_RR
 // https://github.com/moby/moby/issues/28168
 data "scaleway_bootscript" "rancher" {
   architecture = "x86_64"
@@ -41,3 +41,39 @@ resource "scaleway_server" "swarm_manager" {
   }
 }
 
+data "external" "swarm_tokens" {
+  program = ["./fetch-tokens.sh"]
+  query = {
+    host = "${scaleway_ip.swarm_manager_ip.0.ip}"
+  }
+  depends_on = ["scaleway_server.swarm_manager"]
+}
+
+resource "scaleway_ip" "swarm_worker_ip" {
+  count = 2
+}
+
+resource "scaleway_server" "swarm_worker" {
+  count          = 2
+  name           = "swarm_worker-${count.index + 1}"
+  image          = "${data.scaleway_image.xenial.id}"
+  type           = "VC1S"
+  bootscript     = "${data.scaleway_bootscript.rancher.id}"
+  security_group = "${scaleway_security_group.swarm_workers.id}"
+  public_ip      = "${element(scaleway_ip.swarm_worker_ip.*.ip, count.index)}"
+
+  connection {
+    type = "ssh"
+    user = "root"
+  }
+
+  provisioner "remote-exec" {
+    script = "install-docker-ce.sh"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "docker swarm join --token ${data.external.swarm_tokens.result.worker} ${scaleway_server.swarm_manager.0.private_ip}:2377",
+    ]
+  }
+}
