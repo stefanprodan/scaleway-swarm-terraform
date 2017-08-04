@@ -32,6 +32,17 @@ resource "scaleway_server" "swarm_manager" {
     user = "root"
   }
 
+  provisioner "remote-exec" {
+    inline = [
+      "mkdir -p /etc/systemd/system/docker.service.d",
+    ]
+  }
+
+  provisioner "file" {
+    source      = "conf/docker.conf"
+    destination = "/etc/systemd/system/docker.service.d/docker.conf"
+  }
+
   provisioner "file" {
     source      = "install-docker-ce.sh"
     destination = "/tmp/install-docker-ce.sh"
