@@ -48,6 +48,8 @@ resource "scaleway_server" "swarm_worker" {
       "docker node update --availability drain ${self.name}",
     ]
 
+    on_failure = "continue"
+
     connection {
       type = "ssh"
       user = "root"
@@ -62,6 +64,8 @@ resource "scaleway_server" "swarm_worker" {
     inline = [
       "docker swarm leave",
     ]
+
+    on_failure = "continue"
   }
 
   # remove node on destroy
@@ -71,6 +75,8 @@ resource "scaleway_server" "swarm_worker" {
     inline = [
       "docker node rm --force ${self.name}",
     ]
+
+    on_failure = "continue"
 
     connection {
       type = "ssh"
