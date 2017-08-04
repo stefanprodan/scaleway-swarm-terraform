@@ -21,3 +21,7 @@ output "swarm_workers_private_ip" {
 output "swarm_worker_token" {
   value = "${data.external.swarm_tokens.result.worker}"
 }
+
+output "workspace" {
+  value = "${terraform.workspace}"
+}
