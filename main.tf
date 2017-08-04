@@ -44,7 +44,7 @@ resource "scaleway_server" "swarm_manager" {
   }
 
   provisioner "file" {
-    source      = "install-docker-ce.sh"
+    source      = "scripts/install-docker-ce.sh"
     destination = "/tmp/install-docker-ce.sh"
   }
 
@@ -58,7 +58,7 @@ resource "scaleway_server" "swarm_manager" {
 }
 
 data "external" "swarm_tokens" {
-  program = ["./fetch-tokens.sh"]
+  program = ["./scripts/fetch-tokens.sh"]
 
   query = {
     host = "${scaleway_ip.swarm_manager_ip.0.ip}"
@@ -85,8 +85,19 @@ resource "scaleway_server" "swarm_worker" {
     user = "root"
   }
 
+  provisioner "remote-exec" {
+    inline = [
+      "mkdir -p /etc/systemd/system/docker.service.d",
+    ]
+  }
+
   provisioner "file" {
-    source      = "install-docker-ce.sh"
+    source      = "conf/docker.conf"
+    destination = "/etc/systemd/system/docker.service.d/docker.conf"
+  }
+
+  provisioner "file" {
+    source      = "scripts/install-docker-ce.sh"
     destination = "/tmp/install-docker-ce.sh"
   }
 
