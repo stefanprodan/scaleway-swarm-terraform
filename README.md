@@ -61,8 +61,11 @@ terraform apply \
 -var worker_instance_count=2
 ```
 
-You can scale up or down the Docker Swarm Cluster by modifying the `worker_instance_count`, 
-the manager will reschedule the services on the remaining nodes if you chose to scale down.
+You can scale up or down the Docker Swarm Cluster by modifying the `worker_instance_count`. 
+On scale up, all new nodes will join the current cluster.  
+When you scale down the workers, Terraform will first drain the node 
+and remove it from the swarm before destroying the resource.
+
 
 After running the Terraform plan you'll see several output variables like the Swarm tokes, 
 the private and public IPs of each node and the current workspace. 

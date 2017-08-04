@@ -39,6 +39,45 @@ resource "scaleway_server" "swarm_worker" {
       "docker swarm join --token ${data.external.swarm_tokens.result.worker} ${scaleway_server.swarm_manager.0.private_ip}:2377",
     ]
   }
+
+  # drain worker on destroy
+  provisioner "remote-exec" {
+    when = "destroy"
+
+    inline = [
+      "docker node update --availability drain ${self.name}",
+    ]
+
+    connection {
+      type = "ssh"
+      user = "root"
+      host = "${scaleway_ip.swarm_manager_ip.0.ip}"
+    }
+  }
+
+  # leave swarm on destroy
+  provisioner "remote-exec" {
+    when = "destroy"
+
+    inline = [
+      "docker swarm leave",
+    ]
+  }
+
+  # remove node on destroy
+  provisioner "remote-exec" {
+    when = "destroy"
+
+    inline = [
+      "docker node rm --force ${self.name}",
+    ]
+
+    connection {
+      type = "ssh"
+      user = "root"
+      host = "${scaleway_ip.swarm_manager_ip.0.ip}"
+    }
+  }
 }
 
 data "external" "swarm_tokens" {
