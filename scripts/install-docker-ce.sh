@@ -3,8 +3,8 @@
 DOCKER_VERSION=$1
 
 # setup Docker repository
-apt-get update -y
-apt-get install -y \
+apt-get -qq update
+apt-get -qq install \
     apt-transport-https \
     ca-certificates \
     curl \
@@ -16,6 +16,6 @@ add-apt-repository \
    stable"
 
 # install Docker CE
-apt-get update -y
-apt-get install -y docker-ce=$DOCKER_VERSION
+apt-get -q update -y
+apt-get -q install -y docker-ce=$DOCKER_VERSION
 
