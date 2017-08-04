@@ -1,5 +1,5 @@
 provider "scaleway" {
-  region = "ams1"
+  region = "${var.region}"
 }
 
 // Using Racher since Scaleway Docker bootstrap is missing IPVS_NFCT and IPVS_RR

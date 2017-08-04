@@ -2,6 +2,10 @@ variable "docker_version" {
   default = "17.06.0~ce-0~ubuntu"
 }
 
+variable "region" {
+  default = "ams1"
+}
+
 variable "manager_instance_count" {
   default = 1
 }
