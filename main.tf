@@ -13,3 +13,11 @@ data "scaleway_image" "xenial" {
   architecture = "x86_64"
   name         = "Ubuntu Xenial"
 }
+
+data "template_file" "docker_conf" {
+  template = "${file("conf/docker.tpl")}"
+
+  vars {
+    ip = "${var.docker_api_ip}"
+  }
+}

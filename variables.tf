@@ -17,3 +17,7 @@ variable "worker_instance_type" {
 variable "worker_instance_count" {
   default = 2
 }
+
+variable "docker_api_ip" {
+  default = "127.0.0.1"
+}
