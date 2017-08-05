@@ -90,3 +90,32 @@ root@dev-manager-1:~# docker service create \
 
 $ curl $(terraform output swarm_manager_public_ip)
 ```
+
+You could also expose the Docker engine remote API and metrics endpoint on the public IP by running:
+
+```bash
+terraform apply -var docker_api_ip="0.0.0.0"
+```
+
+If you chose to do so, you should allow access to the API only from your IP. 
+You'll have to add a security group rule for ports 2375 and 9323 to the managers and workers groups.
+
+```tf
+resource "scaleway_security_group_rule" "docker_api_accept" {
+  security_group = "${scaleway_security_group.swarm_managers.id}"
+
+  action    = "accept"
+  direction = "inbound"
+  ip_range  = "<YOUR-IP-RANGE>"
+  protocol  = "TCP"
+  port      = 2375
+}
+```
+
+Test your settings by calling the API and metrics endpoint from your computer:
+
+```bash
+$ curl $(terraform output swarm_manager_public_ip):2375/containers/json
+
+$ curl $(terraform output swarm_manager_public_ip):9323/metrics
+```
