@@ -34,7 +34,13 @@ $ export SCALEWAY_TOKEN="<ACCESS-TOKEN>"
 Create a Docker Swarm Cluster with one manager and two workers:
 
 ```bash
+# create a workspace
+terraform workspace new dev
+
+# generate plan
 terraform plan
+
+# run the plan
 terraform apply 
 ```
 
@@ -50,6 +56,10 @@ This will do the following:
 * starts the worker nodes in parallel and setups Docker CE the same as on the manager node
 * joins the worker nodes in the cluster using the manager node private IP
 
+The naming convention for a swarm node is in `<WORKSPACE>-<ROLE>-<INDEX>` format, 
+running the project on workspace dev will create 3 nodes: dev-manager-1, dev-worker-1, dev-worker-2. 
+If you don't create a workspace then you'll be running on the default one and your nods prefix will be `default`.
+
 Customizing the cluster specs via terraform variables:
 
 ```bash
@@ -62,10 +72,9 @@ terraform apply \
 ```
 
 You can scale up or down the Docker Swarm Cluster by modifying the `worker_instance_count`. 
-On scale up, all new nodes will join the current cluster.  
+On scale up, all new nodes will join the current cluster. 
 When you scale down the workers, Terraform will first drain the node 
 and remove it from the swarm before destroying the resource.
-
 
 After running the Terraform plan you'll see several output variables like the Swarm tokes, 
 the private and public IPs of each node and the current workspace. 
@@ -74,7 +83,10 @@ You can use the manager public IP variable to connect via SSH and lunch a servic
 ```bash
 $ ssh root@$(terraform output swarm_manager_public_ip)
 
-root@swarm-manager-1:~# docker service create -d --name nginx -p 80:80 --replicas 2 nginx
+root@dev-manager-1:~# docker service create \
+    --name nginx -dp 80:80 \
+    --replicas 2 \
+    --constraint 'node.role == worker' nginx
 
 $ curl $(terraform output swarm_manager_public_ip)
 ```

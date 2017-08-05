@@ -6,18 +6,14 @@ variable "region" {
   default = "ams1"
 }
 
-variable "manager_instance_count" {
-  default = 1
+variable "manager_instance_type" {
+  default = "VC1S"
 }
 
-variable "manager_instance_type" {
+variable "worker_instance_type" {
   default = "VC1S"
 }
 
 variable "worker_instance_count" {
   default = 2
-}
-
-variable "worker_instance_type" {
-  default = "VC1S"
 }

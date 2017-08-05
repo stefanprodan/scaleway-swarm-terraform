@@ -1,10 +1,10 @@
 resource "scaleway_ip" "swarm_manager_ip" {
-  count = "${var.manager_instance_count}"
+  count = 1
 }
 
 resource "scaleway_server" "swarm_manager" {
-  count          = "${var.manager_instance_count}"
-  name           = "swarm-manager-${count.index + 1}"
+  count          = 1
+  name           = "${terraform.workspace}-manager-${count.index + 1}"
   image          = "${data.scaleway_image.xenial.id}"
   type           = "${var.manager_instance_type}"
   bootscript     = "${data.scaleway_bootscript.rancher.id}"
