@@ -26,6 +26,12 @@ $ export SCALEWAY_ORGANIZATION="<ACCESS-KEY>"
 $ export SCALEWAY_TOKEN="<ACCESS-TOKEN>" 
 ```
 
+Login into Wave Cloud and create a new instance, copy the service token and add the following environment variable:
+
+```bash
+$ export TF_VAR_weave_cloud_token="<SERVICE-TOKEN>"
+```
+
 ### Usage
 
 Create a Docker Swarm Cluster with one manager and two workers:
@@ -50,8 +56,10 @@ This will do the following:
 * starts the manager node and installs Docker CE using the local SSH agent
 * customizes the Docker daemon systemd config by enabling the experimental features and the metrics endpoint
 * initializes the manager node as Docker Swarm manager and extracts the join tokens
+* deploys Wave Scope container on the manager node
 * starts the worker nodes in parallel and setups Docker CE the same as on the manager node
 * joins the worker nodes in the cluster using the manager node private IP
+* deploys Wave Scope container on the worker nodes
 
 The naming convention for a swarm node is in `<WORKSPACE>-<ROLE>-<INDEX>` format, 
 running the project on workspace dev will create 3 nodes: dev-manager-1, dev-worker-1, dev-worker-2. 
@@ -74,37 +82,24 @@ On scale up, all new nodes will join the current cluster.
 When you scale down the workers, Terraform will first drain the node 
 and remove it from the swarm before destroying the resources.
 
-After running the Terraform plan you'll see several output variables like the Swarm tokes, 
+After applying the Terraform plan you'll see several output variables like the Swarm tokes, 
 the private and public IPs of each node and the current workspace. 
-You can use the manager public IP variable to connect via SSH and lunch a service within the Swarm.
+You can use the manager public IP variable to connect to the Docker remote API 
+and lunch a service within the Swarm.
 
 ```bash
-$ ssh root@$(terraform output swarm_manager_public_ip)
+$ export DOCKER_HOST=$(terraform output swarm_manager_public_ip)
 
-root@dev-manager-1:~# docker service create \
+$ docker service create \
     --name nginx -dp 80:80 \
-    --replicas 2 \
+    --replicas 6 \
     --constraint 'node.role == worker' nginx
 
 $ curl $(terraform output swarm_manager_public_ip)
 ```
 
-You could also expose the Docker engine remote API and metrics endpoint on the public IP by running:
-
-```bash
-terraform apply -var docker_api_ip="0.0.0.0"
-```
-
-If you chose to do so, you should allow access to the API only from your IP. 
-You'll have to add a security group rule for ports 2375 and 9323 to the managers and workers groups.
-
-Test your settings by calling the API and metrics endpoint:
-
-```bash
-$ curl $(terraform output swarm_manager_public_ip):2375/containers/json
-
-$ curl $(terraform output swarm_manager_public_ip):9323/metrics
-```
+You should add a security group rule for ports 2375 and 9323 to the managers and workers groups and allow 
+access only from your IP.
 
 Tear down the whole infrastructure with:
 
