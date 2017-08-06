@@ -19,5 +19,8 @@ variable "worker_instance_count" {
 }
 
 variable "docker_api_ip" {
-  default = "127.0.0.1"
+  default = "0.0.0.0"
+}
+
+variable "weave_cloud_token" {
 }

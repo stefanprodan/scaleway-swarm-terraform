@@ -37,6 +37,9 @@ resource "scaleway_server" "swarm_worker" {
       "chmod +x /tmp/install-docker-ce.sh",
       "/tmp/install-docker-ce.sh ${var.docker_version}",
       "docker swarm join --token ${data.external.swarm_tokens.result.worker} ${scaleway_server.swarm_manager.0.private_ip}:2377",
+      "curl -sSL git.io/scope -o /usr/local/bin/scope",
+      "chmod a+x /usr/local/bin/scope",
+      "scope launch --service-token=${var.weave_cloud_token}",
     ]
   }
 
