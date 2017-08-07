@@ -40,6 +40,8 @@ resource "scaleway_server" "swarm_manager" {
       "curl -sSL git.io/scope -o /usr/local/bin/scope",
       "chmod a+x /usr/local/bin/scope",
       "scope launch --service-token=${var.weave_cloud_token}",
+      "iptables -A INPUT -p tcp --dport 2375 -s ${var.docker_api_ip_allow} -j ACCEPT",
+      "iptables -A INPUT -p tcp --dport 2375 -j DROP"
     ]
   }
 }

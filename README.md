@@ -74,7 +74,8 @@ terraform apply \
 -var region=ams1 \
 -var manager_instance_type=VC1S \
 -var worker_instance_type=VC1S \
--var worker_instance_count=2
+-var worker_instance_count=2 \
+- var docker_api_ip_allow=86.124.244.168
 ```
 
 You can scale up or down the Docker Swarm Cluster by modifying the `worker_instance_count`. 
@@ -98,8 +99,7 @@ $ docker service create \
 $ curl $(terraform output swarm_manager_public_ip)
 ```
 
-You should add a security group rule for ports 2375 and 9323 to the managers and workers groups and allow 
-access only from your IP.
+Make sure you allow access only from your IP to manager Docker remote API port.
 
 Tear down the whole infrastructure with:
 

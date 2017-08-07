@@ -22,5 +22,8 @@ variable "docker_api_ip" {
   default = "0.0.0.0"
 }
 
-variable "weave_cloud_token" {
+variable "weave_cloud_token" {}
+
+variable "docker_api_ip_allow" {
+  default = "0.0.0.0/0"
 }
