@@ -1,6 +1,6 @@
 # scaleway-swarm-terraform
 
-Automating Docker Swarm cluster operations with Terraform Scaleway provider.
+Automating Docker Swarm cluster operations and Weave Cloud Agent deployment with Terraform Scaleway provider.
 
 ### Initial setup
 
