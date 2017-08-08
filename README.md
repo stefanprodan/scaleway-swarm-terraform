@@ -9,6 +9,7 @@ Clone the repository and install the dependencies:
 ```bash
 $ git clone https://github.com/stefanprodan/scaleway-swarm-terraform.git
 $ cd scaleway-swarm-terraform
+$ git checkout -b weave
 
 # requires brew
 $ make init
@@ -40,11 +41,13 @@ Create a Docker Swarm Cluster with one manager and two workers:
 # create a workspace
 terraform workspace new dev
 
-# generate plan
-terraform plan
-
-# run the plan
-terraform apply 
+terraform apply \
+-var docker_version=17.06.0~ce-0~ubuntu \
+-var region=ams1 \
+-var manager_instance_type=VC1S \
+-var worker_instance_type=VC1S \
+-var worker_instance_count=2 \
+-var docker_api_ip_allow=86.124.244.168
 ```
 
 This will do the following:
@@ -57,6 +60,7 @@ This will do the following:
 * customizes the Docker daemon systemd config by enabling the experimental features and the metrics endpoint
 * initializes the manager node as Docker Swarm manager and extracts the join tokens
 * deploys Wave Scope container on the manager node
+* allows traffic to the Docker remote API only from the IP specified with `docker_api_ip_allow`
 * starts the worker nodes in parallel and setups Docker CE the same as on the manager node
 * joins the worker nodes in the cluster using the manager node private IP
 * deploys Wave Scope container on the worker nodes
@@ -65,18 +69,6 @@ The naming convention for a swarm node is in `<WORKSPACE>-<ROLE>-<INDEX>` format
 running the project on workspace dev will create 3 nodes: dev-manager-1, dev-worker-1, dev-worker-2. 
 If you don't create a workspace then you'll be running on the default one and your nods prefix will be `default`. 
 You can have multiple workspaces, each with it's own state, so you can run in parallel different Docker Swarm clusters.
-
-Customizing the cluster specs via terraform variables:
-
-```bash
-terraform apply \
--var docker_version=17.06.0~ce-0~ubuntu \
--var region=ams1 \
--var manager_instance_type=VC1S \
--var worker_instance_type=VC1S \
--var worker_instance_count=2 \
-- var docker_api_ip_allow=86.124.244.168
-```
 
 You can scale up or down the Docker Swarm Cluster by modifying the `worker_instance_count`. 
 On scale up, all new nodes will join the current cluster. 
@@ -98,8 +90,6 @@ $ docker service create \
 
 $ curl $(terraform output swarm_manager_public_ip)
 ```
-
-Make sure you allow access only from your IP to manager Docker remote API port.
 
 Tear down the whole infrastructure with:
 
