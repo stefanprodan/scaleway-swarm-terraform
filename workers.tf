@@ -39,7 +39,7 @@ resource "scaleway_server" "swarm_worker" {
       "docker swarm join --token ${data.external.swarm_tokens.result.worker} ${scaleway_server.swarm_manager.0.private_ip}:2377",
       "curl -sSL git.io/scope -o /usr/local/bin/scope",
       "chmod a+x /usr/local/bin/scope",
-      "scope launch --service-token=${var.weave_cloud_token}",
+      "WEAVESCOPE_DOCKER_ARGS='--restart unless-stopped' scope launch --service-token=${var.weave_cloud_token}",
     ]
   }
 
